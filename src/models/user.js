@@ -49,9 +49,23 @@ const userSchema = new mongoose.Schema(
             }
         }]
     
-    }
-)
+    })
 
+    userSchema.virtual('tasks', {
+        ref: 'Task',
+        localField: '_id',
+        foreignField: 'owner'
+    })
+
+// toJSON is used for the delete the 
+// token and password while user is looged in ..
+userSchema.methods.toJSON = function(){
+    const  user = this
+    const  userObject = user.toObject()
+    delete userObject.tokens
+    delete userObject.password
+    return userObject
+}
 
 // logeed..
 

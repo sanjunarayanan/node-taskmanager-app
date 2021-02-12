@@ -4,19 +4,9 @@ const app=express();
 const port = process.env.PORT || 5000;
 app.use(express.json());
 const userRouter = require('./routers/user')
+const taskRouter = require('./routers/task')
 app.use(userRouter)
-const jwt = require('jsonwebtoken')
-
-const myFunction = async ()=>{
-   const token = jwt.sign({_id:'abc123'},'sanjudilna',{expiresIn:'1 second'})
-   console.log(token);
-   const data = jwt.verify(token,'sanjudilna')
-   console.log(data)
-}
-
-//myFunction()
-
-
+app.use(taskRouter)
 app.listen(port,()=>{
    console.log("connecting to the port "+port)
 })
