@@ -2,7 +2,9 @@ const express = require('express');
 const router = new express.Router()
 const User=require('../models/user')
 const auth =require('../middleware/auth')
-
+const multer = require('multer');
+const { get } = require('mongoose');
+const sharp = require('sharp')
 
 // create user
 router.post('/users',async (req,res)=>{
@@ -99,6 +101,50 @@ router.delete('/users/me',auth,async(req,res)=>{
   } catch (error) {
       res.status(500).send(error)
   }
+})
+
+// upload the avatar
+
+const upload = multer({
+    limits : {
+        fileSize :1000000,
+    },
+    fileFilter(req,file,cb) {
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+           return cb(new Error('please upload a jpg or jpeg or png..!'))
+        }else {
+           cb(undefined,true)
+        }
+     }
+})
+ 
+router.post('/user/me/avatar',auth,upload.single('avatar'),async (req,res)=>{
+    const buffer = await sharp(req.file.buffer).resize({width:500,height:500}).png().toBuffer()
+    req.user.avatar=buffer
+    await req.user.save()
+    res.send()
+},(error,req,res,next)=>{
+    res.status(400).send(error.message)
+})
+
+router.delete('/user/me/avatar',auth,async (req,res)=>{
+    req.user.avatar = undefined
+    await req.user.save()
+    res.status(200).send("profile deleted successfully..!")
+})
+
+router.get('/users/:id/avatar',async(req,res)=>{
+    try {
+        const user = await User.findById(req.params.id)
+        if(!user || !user.avatar){
+            throw new Error()
+        }
+        res.set('Content-Type','image/png')
+        res.send(user.avatar)
+    } catch (error) {
+        res.send(error)
+    }
+    
 })
 
 
