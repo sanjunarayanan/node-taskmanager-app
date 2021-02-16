@@ -5,12 +5,14 @@ const auth =require('../middleware/auth')
 const multer = require('multer');
 const { get } = require('mongoose');
 const sharp = require('sharp')
+const {sendWelocomeEmail,sendCancellationEmail} = require('../emails/account')
 
 // create user
 router.post('/users',async (req,res)=>{
     const user= new User(req.body)
     try {
         await user.save()
+        sendWelocomeEmail(user.email,user.name)
         const token = await user.generateToken()
         res.status(201).send({user,token})
     } catch (error) {
@@ -97,6 +99,7 @@ router.patch('/users/me',auth,async(req,res)=>{
 router.delete('/users/me',auth,async(req,res)=>{
   try {
     await req.user.remove()
+    sendCancellationEmail(req.user.email,req.user.name)
     res.send(req.user)
   } catch (error) {
       res.status(500).send(error)
@@ -104,7 +107,6 @@ router.delete('/users/me',auth,async(req,res)=>{
 })
 
 // upload the avatar
-
 const upload = multer({
     limits : {
         fileSize :1000000,
