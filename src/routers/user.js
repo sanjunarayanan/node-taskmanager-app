@@ -21,7 +21,7 @@ router.post('/users',async (req,res)=>{
 })
 
 
-// sign in the user...!
+// login.....!
 router.post('/users/login', async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password)
@@ -30,6 +30,7 @@ router.post('/users/login', async (req, res) => {
         }else{
             const token = await user.generateToken()
             res.send({user,token})
+            res.send("login successfully..!")
         }
         
     } catch (e) {
@@ -63,7 +64,7 @@ router.post('/users/logoutAll',auth,async(req,res)=>{
 })
 
 
-// read all user
+// read profile..
 router.get('/users/me',auth,async(req,res)=>{
   try {
       res.send(req.user)  
